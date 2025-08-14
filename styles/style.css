@@ -1,0 +1,345 @@
+:root {
+  --primary-purple-600: hsl(238, 40%, 52%);
+  --primary-purple-200: hsl(239, 57%, 85%);
+  --primary-pink-400: hsl(358, 79%, 66%);
+  --primary-pink-200: hsl(357, 100%, 86%);
+  --neutral-grey-800: hsl(212, 24%, 26%);
+  --neutral-grey-500: hsl(211, 10%, 45%);
+  --neutral-grey-100: hsl(223, 19%, 93%);
+  --neutral-grey-50: hsl(228, 33%, 97%);
+  --neutral-white: hsl(0, 100%, 100%);
+
+  --font-family: 'Rubik', arial;
+  --font-weight-light: 400;
+  --font-weight-normal: 500;
+  --font-weight-bold: 700;
+
+  --smoothness: 200ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--neutral-grey-50);
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: var(--neutral-grey-500);
+  font-weight: var(--font-weight-normal);
+}
+
+main {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+
+.wrapper {
+  max-width: 48rem;
+  width: 100%;
+  padding: 2rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.input-field-you {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.profile-pic {
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 50%;
+}
+
+.input-field-you textarea {
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--neutral-grey-100);
+  font-weight: var(--font-weight-light);
+  border-radius: .75rem;
+  width: 100%;
+  height: 6rem;
+  resize: none;
+}
+
+.input-field-you textarea:focus {
+  outline: 2px solid var(--primary-purple-600);
+}
+
+.input-field-you textarea::placeholder {
+  opacity: 0.6;
+}
+
+.button {
+  border: none;
+  background-color: var(--primary-purple-600);
+  color: var(--neutral-white);
+  text-transform: uppercase;
+  padding: 0.6rem 1.5rem;
+  width: fit-content;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  transition: var(--smoothness);
+}
+
+.button:hover {
+  opacity: 0.5;
+}
+
+.input-field-you {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  display: grid;
+  grid-auto-columns: auto;
+  grid-template-areas:
+    'input input'
+    'pfp button';
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 48em) {
+  .input-field-you {
+    display: flex;
+    align-items: start;
+  }
+
+  .main-comment-input {
+    padding: 1.5rem;
+  }
+}
+
+.input-field-you img {
+  grid-area: pfp;
+}
+
+.input-field-you textarea {
+  grid-area: input;
+}
+
+.input-field-you button {
+  grid-area: button;
+  justify-self: end;
+}
+
+/* comments styling */
+.main-comment {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 100%;
+  display: grid;
+  grid-auto-columns: auto;
+  grid-template-areas:
+    'score userDetails userDetails reply'
+    'score paragraph paragraph paragraph';
+  gap: 1rem;
+}
+
+.score {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--neutral-grey-100);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+  height: fit-content;
+  width: fit-content;
+  /* for the grid area because the gaps are different */
+  margin-right: 0.5rem;
+
+  grid-area: score;
+}
+
+.score svg {
+  cursor: pointer;
+}
+
+.score svg:hover path {
+  fill: var(--primary-purple-600);
+}
+
+.user-details {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  grid-area: userDetails;
+}
+
+.username {
+  color: var(--neutral-grey-800);
+  font-weight: var(--font-weight-nor);
+  min-width: fit-content;
+}
+
+.username-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  background-color: var(--primary-purple-600);
+  color: var(--neutral-white);
+  padding: 0px 7px;
+  border-radius: 5px;
+  font-size: 0.875rem;
+}
+
+.time-created {
+  font-weight: var(--font-weight-light);
+  min-width: fit-content;
+}
+
+.reply-button {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  color: var(--primary-purple-600);
+  cursor: pointer;
+  transition: var(--smoothness);
+  justify-self: end;
+
+  grid-area: reply;
+}
+
+.reply-button:hover {
+  opacity: 0.6;
+}
+
+.reply-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  grid-area: reply;
+  justify-self: end;
+}
+
+.delete {
+  color: var(--primary-pink-400);
+}
+
+.reply-button img {
+  transform: translateY(1px);
+}
+
+.content {
+  font-weight: var(--font-weight-light);
+
+  grid-area: paragraph;
+}
+
+@media (max-width: 48em) {
+  .main-comment {
+    grid-template-areas:
+      'userDetails userDetails userDetails userDetails'
+      'paragraph paragraph paragraph paragraph'
+      'score score score reply';
+    padding: 1rem;
+  }
+
+  .score {
+    display: flex;
+    padding: 0.5rem 1rem;
+  }
+}
+
+.reply-container {
+  display: flex;
+  align-items: stretch;
+  margin-top: 1.5rem;
+}
+
+.reply-container .profile-pic {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.reply-container .content {
+  font-size: 0.95rem;
+}
+
+.reply-container .reply-buttons {
+  font-size: 0.875rem;
+}
+
+.reply-container .time-created {
+  font-size: 0.85rem;
+}
+
+.line {
+  width: 5px;
+  background-color: var(--neutral-grey-100);
+  margin-inline: 2.5rem;
+}
+
+.reply-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (max-width: 48em) {
+  .line {
+    margin-inline-start: 0;
+    margin-inline-end: 1.5rem;
+  }
+}
