@@ -198,6 +198,7 @@ main {
   align-items: center;
   gap: 1rem;
   background-color: var(--neutral-grey-100);
+  color: var(--primary-purple-600);
   padding: 1rem;
   border-radius: 0.5rem;
   font-size: 1.125rem;
@@ -211,6 +212,11 @@ main {
 
 .score svg {
   cursor: pointer;
+  justify-self: center;
+}
+
+.score svg path {
+  transition: var(--smoothness);
 }
 
 .score svg:hover path {
@@ -234,6 +240,7 @@ main {
 .username-group {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
