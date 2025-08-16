@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log(appData);
 
   renderApp();
+
 });
 
 async function loadInitialData() {
@@ -80,8 +81,8 @@ function generateComment(comment, isReply = false) {
     ? `<p class="reply-button"><img src="./images/icon-reply.svg" alt=""> Reply</p>`
     : `
       <div class="reply-buttons">
-        <p class="reply-button delete"><img src="./images/icon-delete.svg" alt=""> Delete</p>
-        <p class="reply-button edit"><img src="./images/icon-edit.svg" alt=""> Edit</p>
+        <p class="reply-button delete" onclick="deleteComment(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
+        <p class="reply-button edit" onclick="editComment(${comment.id})"><img src="./images/icon-edit.svg" alt=""> Edit</p>
       </div>
     `;
 
@@ -125,7 +126,7 @@ function generateComment(comment, isReply = false) {
     outerEl.appendChild(main);
   }
 
-  if (comment.replies) {
+  if (comment.replies && comment.replies.length > 0) {
     const replyContainer = document.createElement('div');
     replyContainer.className = 'reply-container';
 
@@ -150,11 +151,64 @@ function generateComment(comment, isReply = false) {
 
 function generateInputFieldHTML(currentUser) {
   const div = document.createElement('div');
-  div.className = 'input-field-you comment-container-input';
+  div.className = 'input-field-you';
   div.innerHTML = `
     <img src="${currentUser.image.png}" alt="${currentUser.username}" class="profile-pic">
-    <textarea id="inputYou" placeholder="Add a comment..."></textarea>
-    <button id="sendBtn" class="button">Send</button>
+    <textarea class="input-textarea" placeholder="Add a comment..."></textarea>
+    <button class="button" onclick="sendComment()">Send</button>
   `;
   return div;
+}
+
+function sendComment() {
+  let value = document.querySelector('.input-textarea').value.trim();
+
+  if (value == '') {
+    return;
+  }
+
+  appData.comments.unshift({
+    id: generateId(),
+    content: value,
+    createdAt: 'Just now',
+    score: 0,
+    user: appData.currentUser,
+    replies: []
+  });
+
+  value = '';
+  saveData();
+  renderApp();
+}
+
+function generateId() {
+  let commentsCounter = 0;
+  let replyCounter = 0;
+
+  appData.comments.forEach(comment => {
+    commentsCounter++;
+    replyCounter += comment.replies.length;
+  });
+
+  // all comments + the new one
+  const id = (commentsCounter + replyCounter) + 1;
+
+  return id;
+}
+
+function deleteComment(id) {
+  appData.comments.forEach(comment => {
+    if (comment.replies && comment.replies.length > 0) {
+      comment.replies = comment.replies.filter(reply => reply.id !== id);
+    }
+  });
+
+  appData.comments = appData.comments.filter(comment => comment.id !== id);
+
+  saveData();
+  renderApp();
+}
+
+function editComment(id) {
+
 }

@@ -68,6 +68,10 @@ h6 {
   text-wrap: balance;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -105,7 +109,7 @@ main {
   border-radius: 50%;
 }
 
-.input-field-you textarea {
+.input-textarea {
   padding: 0.5rem 1.25rem;
   border: 2px solid var(--neutral-grey-100);
   font-weight: var(--font-weight-light);
@@ -115,11 +119,11 @@ main {
   resize: none;
 }
 
-.input-field-you textarea:focus {
+.input-textarea:focus {
   outline: 2px solid var(--primary-purple-600);
 }
 
-.input-field-you textarea::placeholder {
+.input-textarea::placeholder {
   opacity: 0.6;
 }
 
@@ -169,7 +173,7 @@ main {
   grid-area: pfp;
 }
 
-.input-field-you textarea {
+.input-field-you .input-textarea {
   grid-area: input;
 }
 
@@ -178,18 +182,18 @@ main {
   justify-self: end;
 }
 
-/* comments styling */
 .main-comment {
   background-color: white;
   border-radius: 0.5rem;
   padding: 1.5rem;
   width: 100%;
   display: grid;
-  grid-auto-columns: auto;
+  grid-template-columns: 2.5rem 1fr auto;
   grid-template-areas:
-    'score userDetails userDetails reply'
-    'score paragraph paragraph paragraph';
-  gap: 1rem;
+    'score userDetails reply'
+    'score paragraph paragraph';
+  gap: 1rem 1.5rem;
+  align-items: start;
 }
 
 .score {
@@ -203,9 +207,7 @@ main {
   border-radius: 0.5rem;
   font-size: 1.125rem;
   height: fit-content;
-  width: fit-content;
-  /* for the grid area because the gaps are different */
-  margin-right: 0.5rem;
+  width: 2.5rem;
 
   grid-area: score;
 }
@@ -227,13 +229,13 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
 
   grid-area: userDetails;
 }
 
 .username {
   color: var(--neutral-grey-800);
-  font-weight: var(--font-weight-nor);
   min-width: fit-content;
 }
 
@@ -242,6 +244,7 @@ main {
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .label {
@@ -250,11 +253,13 @@ main {
   padding: 0px 7px;
   border-radius: 5px;
   font-size: 0.875rem;
+  flex-shrink: 0;
 }
 
 .time-created {
   font-weight: var(--font-weight-light);
   min-width: fit-content;
+  flex-shrink: 0;
 }
 
 .reply-button {
@@ -264,7 +269,7 @@ main {
   color: var(--primary-purple-600);
   cursor: pointer;
   transition: var(--smoothness);
-  justify-self: end;
+  white-space: nowrap;
 
   grid-area: reply;
 }
@@ -277,8 +282,8 @@ main {
   display: flex;
   gap: 1rem;
   align-items: center;
+  white-space: nowrap;
   grid-area: reply;
-  justify-self: end;
 }
 
 .delete {
@@ -297,16 +302,26 @@ main {
 
 @media (max-width: 48em) {
   .main-comment {
+    grid-template-columns: auto 1fr auto;
     grid-template-areas:
-      'userDetails userDetails userDetails userDetails'
-      'paragraph paragraph paragraph paragraph'
-      'score score score reply';
+      'userDetails userDetails userDetails'
+      'paragraph paragraph paragraph'
+      'score . reply';
     padding: 1rem;
+    gap: 1rem;
   }
 
   .score {
     display: flex;
     padding: 0.5rem 1rem;
+    width: fit-content;
+    justify-self: start;
+  }
+
+  .reply-button,
+  .reply-buttons {
+    justify-self: end;
+    align-self: center;
   }
 }
 
