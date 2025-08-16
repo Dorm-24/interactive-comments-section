@@ -54,12 +54,7 @@ function generateComments() {
   commentsList.className = 'comments-list';
 
   appData.comments.forEach(comment => {
-    const commentContainer = document.createElement('article');
-    commentContainer.className = 'comment-container';
-
-    commentContainer.appendChild(generateComment(comment));
-
-    commentsList.appendChild(commentContainer);
+    commentsList.appendChild(generateComment(comment));
   });
 
   wrapper.appendChild(commentsList);
