@@ -81,18 +81,18 @@ function generateComment(comment, isReply = false) {
     ? `<p class="reply-button"><img src="./images/icon-reply.svg" alt=""> Reply</p>`
     : `
       <div class="reply-buttons">
-        <p class="reply-button delete" onclick="deleteComment(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
+        <p class="reply-button delete" onclick="confirmDelete(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
         <p class="reply-button edit" onclick="editComment(${comment.id})"><img src="./images/icon-edit.svg" alt=""> Edit</p>
       </div>
     `;
 
   const mainCommentHTML = `
     <div class="score">
-      <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg">
+      <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg" onclick="upvote(${comment.id})" ${comment.voters?.includes(appData.currentUser.username) ? "disabled" : ""}>
         <path d="M6.33 10.896c.137 0 .255-.05.354-.149.1-.1.149-.217.149-.354V7.004h3.315c.136 0 .254-.05.354-.149.099-.1.148-.217.148-.354V5.272a.483.483 0 0 0-.148-.354.483.483 0 0 0-.354-.149H6.833V1.4a.483.483 0 0 0-.149-.354.483.483 0 0 0-.354-.149H4.915a.483.483 0 0 0-.354.149c-.1.1-.149.217-.149.354v3.37H1.08a.483.483 0 0 0-.354.15c-.1.099-.149.217-.149.353v1.23c0 .136.05.254.149.353.1.1.217.149.354.149h3.333v3.39c0 .136.05.254.15.353.098.1.216.149.353.149H6.33Z" fill="hsl(239, 57%, 85%)" />
       </svg>
       <p class="score-counter">${comment.score}</p>
-      <svg width="11" height="3" xmlns="http://www.w3.org/2000/svg">
+      <svg width="11" height="3" xmlns="http://www.w3.org/2000/svg" onclick="downvote(${comment.id})" ${comment.voters?.includes(appData.currentUser.username) ? "disabled" : ""}>
         <path d="M9.256 2.66c.204 0 .38-.056.53-.167.148-.11.222-.243.222-.396V.722c0-.152-.074-.284-.223-.395a.859.859 0 0 0-.53-.167H.76a.859.859 0 0 0-.53.167C.083.437.009.57.009.722v1.375c0 .153.074.285.223.396a.859.859 0 0 0 .53.167h8.495Z" fill="hsl(239, 57%, 85%)" />
       </svg>
     </div>
@@ -167,13 +167,14 @@ function sendComment() {
     return;
   }
 
-  appData.comments.unshift({
+  appData.comments.push({
     id: generateId(),
     content: value,
     createdAt: 'Just now',
     score: 0,
     user: appData.currentUser,
-    replies: []
+    replies: [],
+    voters: []
   });
 
   value = '';
@@ -196,6 +197,37 @@ function generateId() {
   return id;
 }
 
+function confirmDelete(id) {
+  const dialog = document.createElement('section');
+  dialog.className = 'delete-confirmation-container';
+  dialog.innerHTML = `
+    <div class="delete-confirmation">
+      <h2>Delete comment</h2>
+      <p>Are you sure you want to delete this comment? This will remove the comment and can't be undone.</p>
+      <div class="confirmation-buttons">
+        <button class="cancel">no, cancel</button>
+        <button class="confirm">yes, delete</button>
+      </div>
+    </div>
+  `;
+  wrapper.appendChild(dialog);
+
+  dialog.addEventListener('click', function (e) {
+    if (e.target == this) {
+      dialog.remove();
+    }
+
+    if (e.target.matches('.cancel')) {
+      dialog.remove();
+    }
+
+    if (e.target.matches('.confirm')) {
+      deleteComment(id);
+      dialog.remove();
+    }
+  });
+}
+
 function deleteComment(id) {
   appData.comments.forEach(comment => {
     if (comment.replies && comment.replies.length > 0) {
@@ -211,4 +243,63 @@ function deleteComment(id) {
 
 function editComment(id) {
 
+}
+
+function upvote(id) {
+  const comment = findCommentById(id, appData.comments);
+
+  if (!comment) {
+    return;
+  }
+
+  if (!comment.voters) {
+    comment.voters = [];
+  }
+
+  if (!comment.voters.includes(appData.currentUser.username)) {
+    comment.score++;
+    comment.voters.push(appData.currentUser.username);
+  }
+
+  saveData();
+  renderApp();
+}
+
+function downvote(id) {
+  const comment = findCommentById(id, appData.comments);
+
+  if (!comment) {
+    return;
+  }
+
+  if (!comment.voters) {
+    comment.voters = [];
+  }
+
+  const voterIndex = comment.voters.indexOf(appData.currentUser.username);
+
+  if (comment.voters.includes(appData.currentUser.username)) {
+    comment.score--;
+    comment.voters.splice(voterIndex, 1);
+  }
+
+  saveData();
+  renderApp();
+}
+
+function findCommentById(id, comments) {
+  for (const comment of comments) {
+    if (comment.id === id) {
+      return comment;
+    }
+
+    if (comment.replies && comment.replies.length > 0) {
+      const found = findCommentById(id, comment.replies);
+
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
 }

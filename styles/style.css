@@ -158,17 +158,6 @@ main {
   gap: 1rem;
 }
 
-@media (min-width: 48em) {
-  .input-field-you {
-    display: flex;
-    align-items: start;
-  }
-
-  .main-comment-input {
-    padding: 1.5rem;
-  }
-}
-
 .input-field-you img {
   grid-area: pfp;
 }
@@ -180,6 +169,22 @@ main {
 .input-field-you button {
   grid-area: button;
   justify-self: end;
+}
+
+@media (min-width: 48em) {
+  .input-field-you {
+    display: flex;
+    align-items: start;
+  }
+
+  .main-comment-input {
+    padding: 1.5rem;
+  }
+}
+
+.comments-list {
+  display: grid;
+  gap: 1.5rem;
 }
 
 .main-comment {
@@ -364,4 +369,53 @@ main {
     margin-inline-start: 0;
     margin-inline-end: 1.5rem;
   }
+}
+
+.delete-confirmation-container {
+  position: fixed;
+  inset: 0;
+  background-color: hsl(0, 0%, 0%, 0.5);
+  display: grid;
+  place-items: center;
+}
+
+.delete-confirmation {
+  background-color: var(--neutral-white);
+  padding: 2rem;
+  max-width: 25rem;
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.delete-confirmation h2 {
+  color: var(--neutral-grey-800);
+}
+
+.confirmation-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confirmation-buttons button {
+  border: none;
+  text-transform: uppercase;
+  color: var(--neutral-grey-50);
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  transition: var(--smoothness);
+}
+
+.confirmation-buttons button:hover {
+  opacity: 0.5;
+}
+
+.cancel {
+  background-color: var(--neutral-grey-500);
+}
+
+.confirm {
+  background-color: var(--primary-pink-400);
 }
