@@ -3,10 +3,7 @@ let appData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   appData = await loadInitialData();
-  console.log(appData);
-
   renderApp();
-
 });
 
 async function loadInitialData() {
@@ -78,13 +75,15 @@ function generateComment(comment, isReply = false) {
     `;
 
   const actionButtons = !isCurrentUser
-    ? `<p class="reply-button"><img src="./images/icon-reply.svg" alt=""> Reply</p>`
+    ? `<p class="reply-button" onclick="replyComment(${comment.id}, this)"><img src="./images/icon-reply.svg" alt=""> Reply</p>`
     : `
       <div class="reply-buttons">
         <p class="reply-button delete" onclick="confirmDelete(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
         <p class="reply-button edit" onclick="editComment(${comment.id})"><img src="./images/icon-edit.svg" alt=""> Edit</p>
       </div>
     `;
+
+  const replyUsername = isReply ? `<span class="reply-username">@${comment.replyingTo} </span>` : '';
 
   const mainCommentHTML = `
     <div class="score">
@@ -105,7 +104,7 @@ function generateComment(comment, isReply = false) {
 
     ${actionButtons}
 
-    <p class="content">${comment.content}</p>
+    <p class="content">${replyUsername + comment.content}</p>
   `;
 
   let outerEl;
@@ -154,7 +153,7 @@ function generateInputFieldHTML(currentUser) {
   div.className = 'input-field-you';
   div.innerHTML = `
     <img src="${currentUser.image.png}" alt="${currentUser.username}" class="profile-pic">
-    <textarea class="input-textarea" placeholder="Add a comment..."></textarea>
+    <textarea class="input-textarea" placeholder="Add a comment..." id="inputTextarea" name="inputTextarea"></textarea>
     <button class="button" onclick="sendComment()">Send</button>
   `;
   return div;
@@ -213,11 +212,7 @@ function confirmDelete(id) {
   wrapper.appendChild(dialog);
 
   dialog.addEventListener('click', function (e) {
-    if (e.target == this) {
-      dialog.remove();
-    }
-
-    if (e.target.matches('.cancel')) {
+    if (e.target == this || e.target.matches('.cancel')) {
       dialog.remove();
     }
 
@@ -243,6 +238,108 @@ function deleteComment(id) {
 
 function editComment(id) {
 
+}
+
+let activeReplyEl = null;
+let documentClickListener = null;
+
+function handleOutsideClick(e) {
+  if (!e.target.closest('.comments-list') && !e.target.closest('.reply-input-field')) {
+    closeReplyField();
+  }
+}
+
+function replyComment(id, el) {
+  if (activeReplyEl) {
+    closeReplyField();
+  }
+
+  const replyContainer = document.createElement('div');
+  replyContainer.className = 'input-field-you reply-input-field';
+  replyContainer.innerHTML = `
+    <img src="${appData.currentUser.image.png}" alt="${appData.currentUser.username}" class="profile-pic">
+    <textarea class="input-textarea" placeholder="Add a comment..." id="replyTextarea"></textarea>
+    <button class="button" onclick="sendReply(${id}, this)">Reply</button>
+  `;
+
+  const commentEl = el.closest('.comment-container, .main-comment');
+  commentEl.insertAdjacentElement("afterend", replyContainer);
+
+  activeReplyEl = replyContainer;
+
+  if (!documentClickListener) {
+    documentClickListener = handleOutsideClick;
+    document.addEventListener('click', documentClickListener);
+  }
+
+  const replyToUsername = findCommentById(id, appData.comments).user.username;
+
+  const textarea = replyContainer.querySelector('.input-textarea');
+  textarea.value = `@${replyToUsername} `;
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+}
+
+function sendReply(id, el) {
+  let value = el.previousElementSibling.value.trim();
+
+  if (value == '') {
+    closeReplyField();
+    return;
+  }
+
+  if (value.startsWith('@')) {
+    const spaceIndex = value.indexOf(' ');
+    if (spaceIndex !== -1) {
+      value = value.substring(spaceIndex + 1).trim();
+    }
+  }
+
+  const replyToUsername = findCommentById(id, appData.comments).user.username;
+
+  const newReply = {
+    id: generateId(),
+    content: value,
+    createdAt: 'Just now',
+    score: 0,
+    replyingTo: replyToUsername,
+    user: appData.currentUser,
+    voters: []
+  };
+
+  // Find parent comment to add reply to
+  for (const comment of appData.comments) {
+    if (comment.replies) {
+      const replyMatch = comment.replies.find(r => r.id === id);
+      if (replyMatch) {
+        comment.replies.push(newReply);
+        break;
+      }
+    }
+
+    if (comment.id === id) {
+      comment.replies = comment.replies || [];
+      comment.replies.push(newReply);
+      break;
+    }
+  }
+
+  saveData();
+  closeReplyField();
+  renderApp();
+}
+
+function closeReplyField() {
+  if (activeReplyEl) {
+    activeReplyEl.remove();
+    activeReplyEl = null;
+  }
+
+  if (documentClickListener) {
+    document.removeEventListener('click', documentClickListener);
+    documentClickListener = null;
+  }
 }
 
 function upvote(id) {
