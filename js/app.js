@@ -3,6 +3,7 @@ let appData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   appData = await loadInitialData();
+
   renderApp();
 });
 
@@ -20,8 +21,6 @@ async function loadInitialData() {
     }
 
     const data = await response.json();
-
-    data.comments = data.comments || [];
 
     return data;
 
@@ -79,7 +78,7 @@ function generateComment(comment, isReply = false) {
     : `
       <div class="reply-buttons">
         <p class="reply-button delete" onclick="confirmDelete(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
-        <p class="reply-button edit" onclick="editComment(${comment.id})"><img src="./images/icon-edit.svg" alt=""> Edit</p>
+        <p class="reply-button edit" onclick="editComment(${comment.id}, this)"><img src="./images/icon-edit.svg" alt=""> Edit</p>
       </div>
     `;
 
@@ -104,7 +103,9 @@ function generateComment(comment, isReply = false) {
 
     ${actionButtons}
 
-    <p class="content">${replyUsername + comment.content}</p>
+    <div class="content">
+      <p>${replyUsername + comment.content}</p>
+    </div>
   `;
 
   let outerEl;
@@ -236,15 +237,87 @@ function deleteComment(id) {
   renderApp();
 }
 
-function editComment(id) {
-
-}
-
 let activeReplyEl = null;
+let activeEditEl = null;
 let documentClickListener = null;
 
+function editComment(id, el) {
+  if (activeEditEl) {
+    const { commentEl, contentEl } = activeEditEl;
+    commentEl.replaceChild(contentEl, commentEl.querySelector('.edit-field'));
+    activeEditEl = null;
+  }
+
+  const comment = findCommentById(id, appData.comments);
+  const commentEl = el.closest('.main-comment');
+  const contentEl = commentEl.querySelector('.content');
+
+  const editField = document.createElement('div');
+  editField.className = 'content edit-field';
+  editField.innerHTML = `
+    <textarea class="input-textarea" name="editInput">@${comment.replyingTo} ${comment.content}</textarea>
+    <button class="button update-button" onclick="updateComment(${id}, this)">Update</button>
+  `;
+
+  commentEl.replaceChild(editField, contentEl);
+  activeEditEl = { commentEl, contentEl };
+
+  if (documentClickListener) {
+    document.removeEventListener('mousedown', documentClickListener);
+  }
+  documentClickListener = handleOutsideClick;
+  document.addEventListener('mousedown', documentClickListener);
+
+  const textarea = editField.querySelector('.input-textarea');
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+}
+
+function closeEditField() {
+  if (activeEditEl) {
+    const { commentEl, contentEl } = activeEditEl;
+    commentEl.replaceChild(contentEl, commentEl.querySelector('.edit-field'));
+    activeEditEl = null;
+  }
+
+  if (documentClickListener) {
+    document.removeEventListener('mousedown', documentClickListener);
+    documentClickListener = null;
+  }
+}
+
+function updateComment(id, el) {
+  const comment = findCommentById(id, appData.comments);
+  const textarea = el.previousElementSibling;
+  let newValue = textarea.value.trim();
+
+  if (newValue === '') {
+    return;
+  }
+
+  if (newValue.startsWith('@')) {
+    const spaceIndex = newValue.indexOf(' ');
+    if (spaceIndex !== -1) {
+      newValue = newValue.substring(spaceIndex + 1).trim();
+    }
+  }
+
+  comment.content = newValue;
+
+  if (comment.content.startsWith('@')) {
+    return;
+  }
+
+  saveData();
+  renderApp();
+}
+
 function handleOutsideClick(e) {
-  if (!e.target.closest('.comments-list') && !e.target.closest('.reply-input-field')) {
+  if (activeEditEl && !activeEditEl.commentEl.contains(e.target)) {
+    closeEditField();
+  }
+
+  if (!e.target.closest('.reply-input-field') && !e.target.closest('.reply-button')) {
     closeReplyField();
   }
 }
@@ -278,14 +351,12 @@ function replyComment(id, el) {
   textarea.value = `@${replyToUsername} `;
   textarea.focus();
   textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-
 }
 
 function sendReply(id, el) {
   let value = el.previousElementSibling.value.trim();
 
   if (value == '') {
-    closeReplyField();
     return;
   }
 
@@ -294,6 +365,10 @@ function sendReply(id, el) {
     if (spaceIndex !== -1) {
       value = value.substring(spaceIndex + 1).trim();
     }
+  }
+
+  if (value.startsWith('@')) {
+    return;
   }
 
   const replyToUsername = findCommentById(id, appData.comments).user.username;
@@ -308,12 +383,11 @@ function sendReply(id, el) {
     voters: []
   };
 
-  // Find parent comment to add reply to
   for (const comment of appData.comments) {
     if (comment.replies) {
-      const replyMatch = comment.replies.find(r => r.id === id);
-      if (replyMatch) {
-        comment.replies.push(newReply);
+      const replyIndex = comment.replies.findIndex(r => r.id === id);
+      if (replyIndex !== -1) {
+        comment.replies.splice(replyIndex + 1, 0, newReply);
         break;
       }
     }
@@ -345,10 +419,6 @@ function closeReplyField() {
 function upvote(id) {
   const comment = findCommentById(id, appData.comments);
 
-  if (!comment) {
-    return;
-  }
-
   if (!comment.voters) {
     comment.voters = [];
   }
@@ -364,10 +434,6 @@ function upvote(id) {
 
 function downvote(id) {
   const comment = findCommentById(id, appData.comments);
-
-  if (!comment) {
-    return;
-  }
 
   if (!comment.voters) {
     comment.voters = [];
@@ -398,5 +464,6 @@ function findCommentById(id, comments) {
       }
     }
   }
+
   return null;
 }

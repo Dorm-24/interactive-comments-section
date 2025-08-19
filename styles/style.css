@@ -40,6 +40,16 @@ select {
   font: inherit;
 }
 
+/* hides scrollbar */
+textarea {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+textarea::-webkit-scrollbar {
+  display: none;
+}
+
 button {
   font: inherit;
   cursor: pointer;
@@ -310,9 +320,16 @@ main {
 }
 
 .content {
+  display: grid;
+  gap: 1rem;
   font-weight: var(--font-weight-light);
 
   grid-area: paragraph;
+}
+
+.update-button {
+  justify-self: end;
+  font-weight: var(--font-weight-normal);
 }
 
 @media (max-width: 48em) {
