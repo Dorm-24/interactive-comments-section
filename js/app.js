@@ -255,7 +255,7 @@ function editComment(id, el) {
   const editField = document.createElement('div');
   editField.className = 'content edit-field';
   editField.innerHTML = `
-    <textarea class="input-textarea" name="editInput">@${comment.replyingTo} ${comment.content}</textarea>
+    <textarea class="input-textarea" name="editInput">${comment.replyingTo ? '@' + comment.replyingTo + ' ' : ''}${comment.content}</textarea>
     <button class="button update-button" onclick="updateComment(${id}, this)">Update</button>
   `;
 
