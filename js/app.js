@@ -65,8 +65,7 @@ function generateComment(comment, isReply = false) {
       <div class="username-group">
         <p class="username">${comment.user.username}</p>
       </div>
-    `
-    : `
+    ` : `
       <div class="username-group">
         <p class="username">${comment.user.username}</p>
         <span class="label">you</span>
@@ -74,8 +73,11 @@ function generateComment(comment, isReply = false) {
     `;
 
   const actionButtons = !isCurrentUser
-    ? `<p class="reply-button" onclick="replyComment(${comment.id}, this)"><img src="./images/icon-reply.svg" alt=""> Reply</p>`
-    : `
+    ? `
+      <p class="reply-button" onclick="replyComment(${comment.id}, this)">
+        <img src="./images/icon-reply.svg" alt=""> Reply
+      </p>
+    ` : `
       <div class="reply-buttons">
         <p class="reply-button delete" onclick="confirmDelete(${comment.id})"><img src="./images/icon-delete.svg" alt=""> Delete</p>
         <p class="reply-button edit" onclick="editComment(${comment.id}, this)"><img src="./images/icon-edit.svg" alt=""> Edit</p>
@@ -83,6 +85,8 @@ function generateComment(comment, isReply = false) {
     `;
 
   const replyUsername = isReply ? `<span class="reply-username">@${comment.replyingTo} </span>` : '';
+
+  const timeCreated = typeof comment.createdAt === 'number' ? timeAgo(comment.createdAt) : comment.createdAt;
 
   const mainCommentHTML = `
     <div class="score">
@@ -98,7 +102,7 @@ function generateComment(comment, isReply = false) {
     <div class="user-details">
       <img src="${comment.user.image.png}" alt="${comment.user.username}" class="profile-pic">
       ${usernameGroup}
-      <p class="time-created">${comment.createdAt}</p>
+      <p class="time-created">${timeCreated}</p>
     </div>
 
     ${actionButtons}
@@ -170,7 +174,7 @@ function sendComment() {
   appData.comments.push({
     id: generateId(),
     content: value,
-    createdAt: 'Just now',
+    createdAt: Date.now(),
     score: 0,
     user: appData.currentUser,
     replies: [],
@@ -195,6 +199,29 @@ function generateId() {
   const id = (commentsCounter + replyCounter) + 1;
 
   return id;
+}
+
+function timeAgo(timestamp) {
+  const now = Date.now();
+  const seconds = Math.floor((now - timestamp) / 1000);
+
+  const intervals = [
+    { label: 'year', seconds: 31536000 },
+    { label: 'month', seconds: 2592000 },
+    { label: 'day', seconds: 86400 },
+    { label: 'hour', seconds: 3600 },
+    { label: 'minute', seconds: 60 },
+    { label: 'second', seconds: 1 }
+  ];
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds);
+    if (count >= 1) {
+      return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`;
+    }
+  }
+
+  return 'Just now';
 }
 
 function confirmDelete(id) {
@@ -376,7 +403,7 @@ function sendReply(id, el) {
   const newReply = {
     id: generateId(),
     content: value,
-    createdAt: 'Just now',
+    createdAt: Date.now(),
     score: 0,
     replyingTo: replyToUsername,
     user: appData.currentUser,
