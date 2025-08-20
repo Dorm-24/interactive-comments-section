@@ -22,6 +22,8 @@ async function loadInitialData() {
 
     const data = await response.json();
 
+    data.comments = data.comments || [];
+
     convertCreatedAt(data);
 
     return data;
@@ -35,7 +37,7 @@ async function loadInitialData() {
 function convertCreatedAt(data) {
   data.comments.forEach(comment => {
     comment.createdAt = parseCreatedAt(comment.createdAt);
-    
+
     comment.replies.forEach(reply => {
       reply.createdAt = parseCreatedAt(reply.createdAt);
     });
@@ -49,21 +51,13 @@ function saveData() {
 function renderApp() {
   wrapper.innerHTML = '';
 
-  orderComments();
+  appData.comments.sort((c1, c2) => c2.score - c1.score);
 
   generateComments();
   generateInputFieldHTML();
 }
 
-function orderComments() {
-
-}
-
 function generateComments() {
-  if (!appData.comments) {
-    return;
-  }
-
   const commentsList = document.createElement('section');
   commentsList.className = 'comments-list';
 
