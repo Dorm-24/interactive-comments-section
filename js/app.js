@@ -22,12 +22,24 @@ async function loadInitialData() {
 
     const data = await response.json();
 
+    convertCreatedAt(data);
+
     return data;
 
   } catch (error) {
     console.error('Failed to load data.json', error);
     return { currentUser: { username: 'you', image: { png: '' } }, comments: [] };
   }
+}
+
+function convertCreatedAt(data) {
+  data.comments.forEach(comment => {
+    comment.createdAt = parseCreatedAt(comment.createdAt);
+    
+    comment.replies.forEach(reply => {
+      reply.createdAt = parseCreatedAt(reply.createdAt);
+    });
+  });
 }
 
 function saveData() {
@@ -37,9 +49,14 @@ function saveData() {
 function renderApp() {
   wrapper.innerHTML = '';
 
-  generateComments();
+  orderComments();
 
-  wrapper.appendChild(generateInputFieldHTML(appData.currentUser));
+  generateComments();
+  generateInputFieldHTML();
+}
+
+function orderComments() {
+
 }
 
 function generateComments() {
@@ -153,15 +170,15 @@ function generateComment(comment, isReply = false) {
   return outerEl;
 }
 
-function generateInputFieldHTML(currentUser) {
+function generateInputFieldHTML() {
   const div = document.createElement('div');
   div.className = 'input-field-you';
   div.innerHTML = `
-    <img src="${currentUser.image.png}" alt="${currentUser.username}" class="profile-pic">
+    <img src="${appData.currentUser.image.png}" alt="${appData.currentUser.username}" class="profile-pic">
     <textarea class="input-textarea" placeholder="Add a comment..." id="inputTextarea" name="inputTextarea"></textarea>
     <button class="button" onclick="sendComment()">Send</button>
   `;
-  return div;
+  wrapper.appendChild(div);
 }
 
 function sendComment() {
@@ -188,15 +205,15 @@ function sendComment() {
 
 function generateId() {
   let commentsCounter = 0;
-  let replyCounter = 0;
+  let repliesCounter = 0;
 
   appData.comments.forEach(comment => {
     commentsCounter++;
-    replyCounter += comment.replies.length;
+    repliesCounter += comment.replies.length;
   });
 
-  // all comments + the new one
-  const id = (commentsCounter + replyCounter) + 1;
+  // all current articles + the new one
+  const id = (commentsCounter + repliesCounter) + 1;
 
   return id;
 }
@@ -208,6 +225,7 @@ function timeAgo(timestamp) {
   const intervals = [
     { label: 'year', seconds: 31536000 },
     { label: 'month', seconds: 2592000 },
+    { label: 'week', seconds: 604800 },
     { label: 'day', seconds: 86400 },
     { label: 'hour', seconds: 3600 },
     { label: 'minute', seconds: 60 },
@@ -222,6 +240,56 @@ function timeAgo(timestamp) {
   }
 
   return 'Just now';
+}
+
+function parseCreatedAt(str) {
+  if (typeof str === 'number') {
+    return str;
+  }
+
+  if (str === 'Just now') {
+    return Date.now();
+  }
+
+  const parts = str.split(' ');
+  const value = parseInt(parts[0]);
+  const unit = parts[1];
+
+  const now = Date.now();
+  let ms = 0;
+
+  switch (unit) {
+    case 'second':
+    case 'seconds':
+      ms = value * 1000;
+      break;
+    case 'minute':
+    case 'minutes':
+      ms = value * 60 * 1000;
+      break;
+    case 'hour':
+    case 'hours':
+      ms = value * 60 * 60 * 1000;
+      break;
+    case 'day':
+    case 'days':
+      ms = value * 24 * 60 * 60 * 1000;
+      break;
+    case 'week':
+    case 'weeks':
+      ms = value * 7 * 24 * 60 * 60 * 1000;
+      break;
+    case 'month':
+    case 'months':
+      ms = value * 30 * 24 * 60 * 60 * 1000;
+      break;
+    case 'year':
+    case 'years':
+      ms = value * 365 * 24 * 60 * 60 * 1000;
+      break;
+  }
+
+  return now - ms;
 }
 
 function confirmDelete(id) {
