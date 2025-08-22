@@ -33,7 +33,7 @@ Users should be able to:
 
 ### Links
 
-- Solution URL: 
+- Solution URL: https://www.frontendmentor.io/solutions/solution-with-vanilla-javascript-and-all-bonus-requirements-Gg_7rfaxA_
 - Live Site URL: https://dorm-24.github.io/interactive-comments-section/
 
 ## My process
