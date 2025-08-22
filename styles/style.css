@@ -221,13 +221,13 @@ main {
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  background-color: var(--neutral-grey-100);
+  background-color: var(--neutral-grey-50);
   color: var(--primary-purple-600);
   padding: 1rem;
   border-radius: 0.5rem;
   font-size: 1.125rem;
   height: fit-content;
-  width: 2.5rem;
+  width: 2.6rem;
 
   grid-area: score;
 }
